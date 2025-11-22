@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Study App Advanced</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Use Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pastel-blue: #b7e3e5;
+            --pastel-pink: #f2bbf9;
+            --pastel-yellow: #ffe0b2;
+            --pastel-green: #d8e0dc;
+            --pastel-purple: #d8b4f8;
+            --notification-red: #ffb4b4;
+            --subject-red: #FFB4B4;
+            --subject-blue: #B4F9FF;
+            --subject-green: #BFFFB4;
+            --subject-orange: #FFE2B4;
+            --subject-purple: #D8B4F8;
+        }
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #f7f8fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 430px;
+            margin: 2rem auto;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(173, 216, 230, 0.13);
+            background: #fff;
+            padding: 2rem 1.5rem 1rem 1.5rem;
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--pastel-blue);
+        }
+        .hidden { display: none; }
+        nav {
+            display: flex;
+            justify-content: space-around;
+            background: var(--pastel-blue);
+            padding: 0.7em 0;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            margin-bottom: 2em;
+        }
+        nav button {
+            background: none;
+            color: #489fb5;
+            border: none;
+            font-size: 1em;
+        }
+        nav button.active {
+            font-weight: bold;
+            color: #b38bae;
+            text-decoration: underline;
+        }
+        .progress-bar {
+            margin-top:1em;
+            height: 20px;
+            border-radius: 10px;
+            background: var(--pastel-blue);
+            overflow: hidden;
+        }
+        .progress-inner {
+            width:0%;
+            background:linear-gradient(90deg, var(--pastel-pink) 30%, var(--pastel-purple) 100%);
+            height:100%;
+            border-radius:10px;
+            transition:width 0.5s;
+        }
+        .circular-timer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1em 0 0.7em 0;
+        }
+        .circle-svg {
+            width: 160px;
+            height: 160px;
+        }
+        .circle-text {
+            fill: #b38bae;
+            font-size: 2em;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        .timer-controls {
+            margin-top: 0.5em;
+            display: flex;
+            gap: 0.3em;
+        }
+        .timer-controls button {
+            background: var(--pastel-yellow);
+            color: #555;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            padding: 0.45em 1.2em;
+            cursor: pointer;
+        }
+        .timer-controls button:disabled {
+            background: #ededed;
+            color: #aaa;
+        }
+        .card {
+            background: var(--pastel-green);
+            border-radius: 12px;
+            margin: 1em 0;
+            padding: 1em;
+            box-shadow: 0 2px 6px #b7dbe666;
+        }
+        .subject-list {
+            margin-top: 1em;
+            padding: 0;
+            list-style: none;
+        }
+        .subject-list li {
+            display: inline-block;
+            border-radius: 8px;
+            padding: 0.25em 0.8em;
+            margin: 0.15em 0.3em 0.15em 0;
+            font-size: 1em;
+            color: #222;
+        }
+        /* Notification Icon */
+        .notification-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 1em;
+            padding: 5px 0;
+        }
+        .notification-icon {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-right: 1em;
+        }
+        .notification-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+        .notification-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--notification-red);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.9em;
+            min-width: 18px;
+            min-height: 18px;
+            text-align: center;
+            padding: 2px 5px;
+            line-height:18px;
+        }
+        .notification-dropdown {
+            position: absolute;
+            right: 0;
+            top: 34px;
+            background: var(--pastel-yellow);
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(173,216,230,0.10);
+            min-width: 230px;
+            z-index: 500;
+            padding: 0.6em 0.6em 0.3em 0.6em;
+        }
+        .notification-dropdown ul {
+            list-style: none;
+            margin:0;
+            padding:0;
+        }
+        .notification-dropdown li {
+            padding: 0.5em 0.5em;
+            border-bottom: 1px solid #ffd6d6;
+            color: #a4475b;
+        }
+        .notification-dropdown li:last-child { border-bottom:none; }
+        .notification-dropdown button {
+            background: var(--pastel-blue);
+            border:none;
+            border-radius: 6px;
+            padding:0.3em 0.7em;
+            margin-left:0.5em;
+            font-size:0.95em;
+        }
+        /* Pie Chart */
+        .challenge-chart-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1.2em 0 0.7em 0;
+        }
+        #challengePie {
+            width: 122px;
+            height: 122px;
+        }
+        /* Calendar select & form elements */
+        .calendar-block {
+            margin: 0.8em 0;
+        }
+        .calendar-block label {
+            font-weight: 600;
+            color: var(--pastel-blue);
+        }
+        .hours-ref {
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6em;
+            font-size: 1em;
+            margin-bottom: .75em;
+            background: #eaeaea;
+            color: #555;
+        }
+        /* Inspirational Quotes */
+        #inspirationalQuoteBlock {
+            position: relative;
+            background: var(--pastel-purple);
+            border-radius: 14px;
+            margin: 1em auto;
+            padding: 1em 1.5em 1em 2em;
+            box-shadow: 0 2px 12px #ccb4e077;
+            font-size: 1.05em;
+            max-width: 320px;
+        }
+        #quoteCross {
+            position: absolute;
+            left: 10px; top: 10px;
+            font-weight: bold;
+            background: #ffe0b2;
+            color: #a75c61;
+            border-radius: 40%;
+            border: none;
+            width: 24px; height: 24px;
+            cursor: pointer;
+        }
+        #quoteRemove {
+            margin-top: .9em;
+            color: #ad515b;
+            background: #ffe0b2;
+            border: none;
+            border-radius: 8px;
+            padding: .45em 1em;
+            font-size: .98em;
+            cursor: pointer;
+        }
+        #addQuoteBlock {
+            background: var(--pastel-blue);
+            padding: 0.75em 1em;
+            border-radius:12px;
+            margin:1em 0;
+        }
+        #addQuoteButton {
+            background: var(--pastel-pink);
+            padding: 0.4em 1.1em;
+            font-size: .98em;
+            border: none;
+            border-radius: 8px;
+            color: #764d5b;
+            margin-left:0.4em;
+        }
+        /* Subject input colors */
+        .subject-color-preview {
+            vertical-align: middle;
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: inline-block; margin-right: 5px;
+        }
+        /* Responsive */
+        @media (max-width: 480px) {
+          .container { padding: 1.1em 0.2em 1em 0.2em; }
+        }
+        /* Modal overlay */
+        #logTimeModal {
+            position: fixed;
+            z-index: 1000;
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
+            background: #fff; border-radius: 16px; box-shadow: 0 6px 42px #ba9aa24a;
+            padding: 1.6em 1.2em;
+            min-width: 230px;
+            max-width: 92vw;
+        }
+        #logTimeModal h3 {margin-bottom: 0.6em;}
+        #logTimeOverlay {
+            position: fixed; z-index:999; left:0; top:0;
+            width:100vw; height:100vh; background: #0002;
+        }
+        #logTimeDismiss, #logTimeSubmit {
+            margin: 0.8em 0.6em 0 0;
+            background: var(--pastel-pink);
+            border: none; border-radius: 7px;
+            padding: 0.35em 1em;
+            color: #704161; font-size: 1em;
+            cursor:pointer;
+        }
+        #logTimeModal label {
+            display: block; font-size:1em; margin:0.6em 0 0.2em 0;
+        }
+        .modal-subject-list {
+            margin:0;
+            list-style:none;
+            padding:0;
+        }
+        .modal-subject-list li {
+            margin-bottom:0.6em;
+        }
+        #addSubjectInModalButton { margin-top: 0.5em; background: var(--pastel-blue); border-radius:8px; padding:0.3em 1em; border:none; }
+        #modalColorInput { width:28px; height:28px; border-radius:50%; border:1.5px solid #999; vertical-align:middle; margin-left:6px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Registration/Login Page -->
+    <div id="authPage">
+        <h1>Register or Login</h1>
+        <form id="registerForm" autocomplete="off">
+            <input type="text" id="userName" required placeholder="Enter your name" style="width:100%;padding:0.7em;border-radius:8px;margin-bottom:0.7em;">
+            <input type="text" id="userClass" required placeholder="Enter your class (e.g., 7A)" style="width:100%;padding:0.7em;border-radius:8px;margin-bottom:0.7em;">
+            <input type="password" id="userPassword" required placeholder="Create password" style="width:100%;padding:0.7em;border-radius:8px;margin-bottom:0.7em;">
+            <input type="submit" value="Register" style="width:100%;margin-bottom:0.7em;">
+        </form>
+        <div style="margin: 1.2em 0;text-align: center;color: #b38bae;"><b>Login again?</b></div>
+        <form id="loginForm" autocomplete="off">
+            <input type="text" id="loginName" required placeholder="Your name" style="width:100%;padding:0.7em;border-radius:8px;margin-bottom:0.7em;">
+            <input type="password" id="loginPassword" required placeholder="Your password" style="width:100%;padding:0.7em;border-radius:8px;margin-bottom:0.7em;">
+            <input type="submit" value="Login" style="width:100%;">
+        </form>
+        <div id="authError" style="color: #c33; margin-top:1em; text-align:center; display:none;"></div>
+    </div>
+    <!-- Main App UI -->
+    <div id="appUI" class="hidden">
+        <nav>
+            <button id="tab1" onclick="selectTab(1)" class="active">Tracker</button>
+            <button id="tab2" onclick="selectTab(2)">Challenges</button>
+            <button id="tab3" onclick="selectTab(3)">Profile</button>
+        </nav>
+        <!-- Tracker Page -->
+        <div id="trackerPage">
+            <div class="notification-bar">
+                <div class="notification-icon" onclick="toggleNotifications()" tabindex="0">
+                    <svg fill="none" stroke="#ba6f65" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2H10a2 2 0 002 2zm6.3-6v-5a6.3 6.3 0 10-12.6 0v5c0 .66-.34 1.25-.9 1.57-.33.19-.4.63-.14.93A1 1 0 007 18h10a1 1 0 00.84-1.5c-.26-.3-.18-.74.15-.93A1.65 1.65 0 0018.3 16z"/></svg>
+                    <span class="notification-count" id="notifCount">0</span>
+                    <div class="notification-dropdown hidden" id="notifDropdown">
+                        <ul id="notifList"></ul>
+                        <button onclick="clearAllNotifications()">Clear All</button>
+                    </div>
+                </div>
+            </div>
+            <h2>Study Tracker</h2>
+            <form id="addSubjectForm" style="display:flex; gap:0.5em; margin-bottom:0.7em;">
+                <input type="text" id="newSubject" placeholder="Add subject" style="flex:1;">
+                <input type="color" id="newSubjectColor" title="Choose color" value="#B7E3E5" style="border-radius:8px;width:32px;height:32px;">
+                <button type="submit" style="background:var(--pastel-blue);border-radius:8px;padding:0 1.2em;">Add</button>
+            </form>
+            <div>
+                <ul id="todaySubjectList" class="subject-list"></ul>
+            </div>
+            <div class="circular-timer" id="circularTimerBlock">
+                <svg class="circle-svg">
+                    <circle cx="80" cy="80" r="70" stroke="#d8e0dc" stroke-width="10" fill="none"/>
+                    <circle id="timerArc" cx="80" cy="80" r="70" stroke="url(#grad)" stroke-width="10" fill="none"
+                        stroke-dasharray="439.6" stroke-dashoffset="439.6" style="transition: stroke-dashoffset 0.2s"/>
+                    <defs>
+                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#b7e3e5"/>
+                        <stop offset="100%" stop-color="#f2bbf9"/>
+                        </linearGradient>
+                    </defs>
+                    <text id="timerText" x="80" y="88" class="circle-text" text-anchor="middle">00:00</text>
+                </svg>
+                <div class="timer-controls">
+                    <button id="startTimerBtn" type="button" onclick="startTimer()">Start</button>
+                    <button id="pauseTimerBtn" type="button" onclick="pauseTimer()" disabled>Pause</button>
+                    <button id="resetTimerBtn" type="button" onclick="resetTimer()" disabled>Reset</button>
+                    <button id="logTimerBtn" type="button" onclick="showLogTimeModal()" disabled>Log Time</button>
+                </div>
+                <small style="color:#888;">Use timer for your study, then log time below.</small>
+            </div>
+            <form id="studyForm" autocomplete="off">
+                <input type="text" id="subject" required placeholder="Subject" style="width:100%;margin-bottom:8px;">
+                <input type="number" id="hours" required min="0.25" step="0.25" placeholder="Hours Studied" style="width:100%;margin-bottom:8px;">
+                <input type="submit" value="Add Session" style="width:100%;">
+            </form>
+            <div class="progress-bar"><div class="progress-inner" id="progressBar"></div></div>
+            <span id="progressText" style="display:block; text-align:center;">Progress: 0%</span>
+            <ul id="studyList"></ul>
+        </div>
+        <!-- Challenge Page -->
+        <div id="challengePage" class="hidden">
+            <h2>Study Challenge</h2>
+            <div class="challenge-chart-block">
+                <canvas id="challengePie" width="122" height="122"></canvas>
+                <div id="challengePieLabel" style="font-weight:600; color:#c779af; font-size:1em"></div>
+            </div>
+            <form id="challengeForm">
+                <div class="calendar-block">
+                    <label for="challengeStart">Start date:</label> <input type="date" id="challengeStart" required>
+                    <label for="challengeEnd">End date:</label> <input type="date" id="challengeEnd" required>
+                </div>
+                <select id="challengeType" class="hours-ref">
+                    <option value="daily">1 Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                </select>
+                <input type="number" id="challengeGoal" class="hours-ref" placeholder="Hours Goal" min="1" step="1" required>
+                <input type="number" id="challengeRefHours" class="hours-ref" placeholder="Reference hours per day/week/month" min="1" step="1" required>
+                <select id="challengeSubject" class="hours-ref" multiple size="2"></select>
+                <button type="submit" style="background:#d8e0dc; color:#ae5e80; font-size:1.08em; border:none;padding:0.5em 1.2em;border-radius:8px;cursor:pointer;margin:0.6em 0;">Start Challenge</button>
+            </form>
+            <div id="challengeProgress" class="card hidden">
+                <b>Challenge progress:</b>
+                <div class="progress-bar"><div class="progress-inner" id="challengeProgressBar"></div></div>
+                <span id="challengeProgressText"></span>
+            </div>
+            <h4>Send a challenge to friend:</h4>
+            <input type="text" id="friendUser" placeholder="Friend name">
+            <button onclick="sendChallenge()">Send Challenge Request</button>
+            <div id="challengeSentMsg" class="hidden card"></div>
+        </div>
+        <!-- Profile Page -->
+        <div id="profilePage" class="hidden">
+            <h2>Profile</h2>
+            <div id="inspirationalQuoteBlock" class="hidden">
+                <button id="quoteCross" onclick="dismissQuote()">✕</button>
+                <span id="quoteText"></span>
+                <button id="quoteRemove" onclick="removeQuote()">Remove Quote</button>
+            </div>
+            <div id="addQuoteBlock">
+                <input type="text" id="quoteInput" placeholder="Add your own inspirational quote" style="width:65%; padding:0.65em; border-radius:6px; border:none;">
+                <button id="addQuoteButton" onclick="addQuote()">Add</button>
+            </div>
+            <div class="card">
+                <b>User:</b> <span id="profileUserName"></span> <span id="profileUserClass"></span>
+                <br><b>Total study hours:</b> <span id="totalHoursProfile">0</span>
+                <br><b>Today:</b> <span id="todayHoursProfile">0</span>
+                <br><b>This Week:</b> <span id="weekHoursProfile">0</span>
+                <br><b>This Month:</b> <span id="monthHoursProfile">0</span>
+                <br><b>This Year:</b> <span id="yearHoursProfile">0</span>
+            </div>
+            <h4>Subjects Read Most (period):</h4>
+            <div id="mostSubjectsBlock">
+                <div id="mostSubjectsDay"></div>
+                <div id="mostSubjectsWeek"></div>
+                <div id="mostSubjectsMonth"></div>
+                <div id="mostSubjectsYear"></div>
+            </div>
+            <h4>Friends:</h4>
+            <ul id="friendsList"></ul>
+            <input type="text" id="addFriendInput" placeholder="Search name to add friend">
+            <button onclick="searchFriend()">Search</button>
+            <div id="friendSearchResults"></div>
+            <div id="friendMsg" class="hidden card"></div>
+        </div>
+        <!-- Log Time Modal -->
+        <div id="logTimeOverlay" class="hidden"></div>
+        <div id="logTimeModal" class="hidden">
+            <h3>Select subject & color for logging study</h3>
+            <div id="modalSubjectBlock"></div>
+            <button id="logTimeSubmit">Log</button>
+            <button id="logTimeDismiss">Dismiss</button>
+        </div>
+    </div>
+</div>
+<script>
+    // --- Persistence and State ---
+    const STORAGE_KEY = "studyAppUsers";
+    const SESSION_KEY = "studyAppSession";
+    const QUOTE_KEY = "studyAppQuote";
+    function loadUsers() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+    function saveUsers(users) { localStorage.setItem(STORAGE_KEY, JSON.stringify(users)); }
+    function setSession(name) { localStorage.setItem(SESSION_KEY, name); }
+    function getSession() { return localStorage.getItem(SESSION_KEY); }
+    function setSavedQuote(q) { localStorage.setItem(QUOTE_KEY, JSON.stringify(q)); }
+    function getSavedQuote() { return JSON.parse(localStorage.getItem(QUOTE_KEY) || "null"); }
+
+    let users = loadUsers(), user = null, notifications = [], challenge = null, studySessions = [], friends = [], subjects = [], inspirationalQuote = null;
+    function showAuthError(msg) {
+        const el = document.getElementById('authError');
+        el.textContent = msg; el.style.display = 'block';
+        setTimeout(()=>{el.style.display='none';}, 3000);
+    }
+    document.getElementById('registerForm').onsubmit = function(e) {
+        e.preventDefault();
+        const name = document.getElementById('userName').value.trim(), cls = document.getElementById('userClass').value.trim(), pass = document.getElementById('userPassword').value;
+        if (!name || !cls || !pass) return;
+        if(users.find(u=>u.name===name)) { showAuthError("Name already registered. Please login or use a different name."); return;}
+        user = {name, class:cls, password:pass, friends:[], studySessions:[], subjects:[], notifications:[]};
+        users.push(user); saveUsers(users); setSession(name); showApp();
+    };
+    document.getElementById('loginForm').onsubmit = function(e) {
+        e.preventDefault();
+        const name = document.getElementById('loginName').value.trim(), pass = document.getElementById('loginPassword').value;
+        users = loadUsers();
+        const u = users.find(u=>u.name===name && u.password===pass);
+        if(u) { user = u; setSession(name); showApp();}
+        else showAuthError("Incorrect name or password.");
+    };
+    function showApp() {
+        document.getElementById('authPage').classList.add('hidden');
+        document.getElementById('appUI').classList.remove('hidden');
+        friends = user.friends || []; studySessions = user.studySessions || [];
+        subjects = user.subjects || []; notifications = user.notifications || [];
+        document.getElementById('profileUserName').textContent = user.name;
+        document.getElementById('profileUserClass').textContent = `(Class: ${user.class})`;
+        updateFriends(); updateProfile(); updateStudyList();
+        updateProgress(); updateSubjectsList(); updateNotifCount(); renderNotifications();
+        fillChallengeSubjects(); showQuoteOnLoad(); selectTab(1);
+    }
+    window.onload = function() {
+        users = loadUsers();
+        const sessionName = getSession();
+        inspirationalQuote = getSavedQuote();
+        if(sessionName && users.find(u=>u.name===sessionName)) {
+            user = users.find(u=>u.name===sessionName); showApp();
+        } else if(inspirationalQuote) { showQuoteOnLoad(); }
+    };
+    function selectTab(n) {
+        document.getElementById('tab1').classList.remove('active');
+        document.getElementById('tab2').classList.remove('active');
+        document.getElementById('tab3').classList.remove('active');
+        document.getElementById('trackerPage').classList.add('hidden');
+        document.getElementById('challengePage').classList.add('hidden');
+        document.getElementById('profilePage').classList.add('hidden');
+        if(n===1) { document.getElementById('tab1').classList.add('active'); document.getElementById('trackerPage').classList.remove('hidden'); }
+        else if(n===2) { document.getElementById('tab2').classList.add('active'); document.getElementById('challengePage').classList.remove('hidden'); drawChallengePie(); fillChallengeSubjects();}
+        else { document.getElementById('tab3').classList.add('active'); document.getElementById('profilePage').classList.remove('hidden'); updateProfile(); updateFriends(); showQuoteOnLoad(); }
+    }
+    // Notifications
+    function toggleNotifications() {
+        let dropdown = document.getElementById('notifDropdown');
+        dropdown.classList.toggle('hidden'); renderNotifications();
+    }
+    function addNotification(text, type="info") {
+        notifications.unshift({text, type});
+        user.notifications = notifications; saveUsers(users);
+        updateNotifCount(); renderNotifications();
+    }
+    function updateNotifCount() { document.getElementById('notifCount').textContent = notifications.length; }
+    function renderNotifications() {
+        let notifList = document.getElementById('notifList');
+        notifList.innerHTML = '';
+        notifications.forEach((notif, idx) => {
+            let li = document.createElement('li');
+            li.innerHTML = notif.text +
+                ((notif.type==="friend_request") ? ` <button onclick="acceptFriend(${idx})">Accept</button>`:"") +
+                ((notif.type==="challenge_request") ? ` <button onclick="acceptChallenge(${idx})">Accept</button>`:"");
+            notifList.appendChild(li);
+        });
+        if(notifications.length === 0) notifList.innerHTML = "<li>No notifications</li>";
+    }
+    function clearAllNotifications() { notifications = []; user.notifications = []; saveUsers(users); updateNotifCount(); renderNotifications(); }
+    function acceptFriend(idx){
+        let notif = notifications[idx]; let fname = notif.text.split(" ")[2];
+        if(friends.indexOf(fname)===-1) friends.push(fname);
+        notifications.splice(idx,1); user.friends = friends; user.notifications = notifications; saveUsers(users);
+        updateFriends(); renderNotifications(); updateNotifCount();
+        document.getElementById('friendMsg').classList.remove('hidden');
+        document.getElementById('friendMsg').textContent = `You accepted ${fname} as friend.`;
+    }
+    function acceptChallenge(idx){
+        notifications.splice(idx,1); user.notifications = notifications; saveUsers(users);
+        renderNotifications(); updateNotifCount();
+        addNotification(`You accepted the challenge request!`,"info");
+    }
+    // --- Timer --- //
+    let timerSeconds = 0, timerInterval = null, isRunning = false;
+    const TIMER_LIMIT = 3600, dashArray = 2 * Math.PI * 70;
+    const timerArc = document.getElementById('timerArc'), timerText = document.getElementById('timerText');
+    function startTimer() { if(isRunning) return;
+        timerInterval = setInterval(() => {
+            timerSeconds++; updateTimerUI();
+            if(timerSeconds >= TIMER_LIMIT) {pauseTimer();}
+        }, 1000); isRunning = true; toggleTimerButtons();
+    }
+    function pauseTimer() { if(!isRunning) return; clearInterval(timerInterval); isRunning = false; toggleTimerButtons(); }
+    function resetTimer() { pauseTimer(); timerSeconds = 0; updateTimerUI(); toggleTimerButtons(); }
+    function updateTimerUI() {
+        let mins = Math.floor(timerSeconds/60).toString().padStart(2,'0'), secs = (timerSeconds%60).toString().padStart(2,'0');
+        timerText.textContent = `${mins}:${secs}`;
+        let percent = Math.min(1, timerSeconds / TIMER_LIMIT), offset = dashArray * (1 - percent);
+        timerArc.setAttribute('stroke-dashoffset', offset);
+    }
+    function toggleTimerButtons() {
+        document.getElementById('startTimerBtn').disabled = isRunning;
+        document.getElementById('pauseTimerBtn').disabled = !isRunning;
+        document.getElementById('resetTimerBtn').disabled = !(isRunning || timerSeconds > 0);
+        document.getElementById('logTimerBtn').disabled = timerSeconds < 60;
+    }
+    updateTimerUI(); toggleTimerButtons();
+    // Log time modal logic
+    function showLogTimeModal() {
+        renderLogTimeModal();
+        document.getElementById('logTimeOverlay').classList.remove('hidden');
+        document.getElementById('logTimeModal').classList.remove('hidden');
+    }
+    function hideLogTimeModal() {
+        document.getElementById('logTimeOverlay').classList.add('hidden');
+        document.getElementById('logTimeModal').classList.add('hidden');
+    }
+    function renderLogTimeModal() {
+        let block = document.getElementById('modalSubjectBlock');
+        block.innerHTML = "";
+        if(subjects.length === 0) {
+            block.innerHTML = `<label>Add a new subject: <input id="modalSubjectInput" type="text" style="padding:0.4em;">
+                <input type="color" id="modalColorInput" value="#B7E3E5"> 
+                <button id="addSubjectInModalButton">Add</button></label>`;
+            setTimeout(()=>{document.getElementById('addSubjectInModalButton').onclick = function() {
+                let subj = document.getElementById('modalSubjectInput').value.trim();
+                let color = document.getElementById('modalColorInput').value;
+                if(subj && !subjects.find(s=>s.name===subj)) {
+                    subjects.push({name:subj,color:color});
+                    user.subjects = subjects; saveUsers(users);
+                    renderLogTimeModal(); updateSubjectsList();
+                }
+            }},50);
+        } else {
+            let ul = document.createElement('ul'); ul.className = "modal-subject-list";
+            subjects.forEach((s,i) => {
+                let li = document.createElement('li');
+                li.innerHTML = `<input type="radio" name="modalSubject" id="modalSubject${i}" value="${s.name}" ${i===0?'checked':''}>
+                    <span class="subject-color-preview" style="background:${s.color}"></span> 
+                    <label for="modalSubject${i}">${s.name}</label>`;
+                ul.appendChild(li);
+            });
+            block.appendChild(ul);
+        }
+    }
+    document.getElementById('logTimeSubmit').onclick = function() {
+        let subject = null;
+        if(subjects.length===0) {
+            let subjEl = document.getElementById('modalSubjectInput');
+            let colorEl = document.getElementById('modalColorInput');
+            if(subjEl && colorEl) {
+                subject = {name:subjEl.value.trim(), color:colorEl.value};
+                subjects.push(subject); user.subjects = subjects; saveUsers(users);
+            }
+        } else {
+            let radios = document.getElementsByName('modalSubject');
+            let found = Array.from(radios).find(r=>r.checked);
+            subject = subjects.find(s=>s.name===found.value);
+        }
+        let hours = Math.round(timerSeconds/900)/4;
+        if(subject && hours>0) {
+            studySessions.push({subject:subject.name, hours, date:new Date(), color:subject.color});
+            user.studySessions = studySessions; saveUsers(users);
+            updateStudyList(); updateProgress(); updateSubjectsList();
+            updateProfile(); updateChallengeProgress(); drawChallengePie();
+        }
+        resetTimer();
+        hideLogTimeModal();
+    };
+    document.getElementById('logTimeDismiss').onclick = function() { hideLogTimeModal(); resetTimer(); };
+    document.getElementById('logTimeOverlay').onclick = function() { hideLogTimeModal(); };
+
+    // Subject Adding
+    document.getElementById('addSubjectForm').onsubmit = function(e) {
+        e.preventDefault();
+        let subject = document.getElementById('newSubject').value.trim();
+        let color = document.getElementById('newSubjectColor').value;
+        if(subject && !subjects.find(s=>s.name===subject)) {
+            subjects.push({name:subject,color:color});
+            user.subjects = subjects; saveUsers(users); updateSubjectsList(); fillChallengeSubjects();
+            document.getElementById('newSubject').value = '';
+        }
+    };
+    function updateSubjectsList() {
+        let ul = document.getElementById('todaySubjectList'); ul.innerHTML = "";
+        subjects.forEach((s) => {
+            let li = document.createElement('li');
+            li.textContent = s.name;
+            li.style.background = s.color;
+            ul.appendChild(li);
+        });
+    }
+
+    // Study Tracker
+    document.getElementById('studyForm').onsubmit = function(e) {
+        e.preventDefault();
+        const subjectInput = document.getElementById('subject').value.trim();
+        const subject = subjects.find(s=>s.name===subjectInput)
+                    || {name:subjectInput, color:"#B7E3E5"};
+        if(!subjects.find(s=>s.name===subjectInput)){
+            subjects.push(subject); user.subjects = subjects; saveUsers(users); updateSubjectsList();
+        }
+        const hours = parseFloat(document.getElementById('hours').value);
+        if (!subjectInput || isNaN(hours) || hours<=0) return;
+        const session = {subject:subject.name, hours, date:new Date(), color:subject.color};
+        studySessions.push(session); user.studySessions = studySessions; saveUsers(users);
+        updateStudyList(); updateProgress(); updateSubjectsList(); fillChallengeSubjects();
+        document.getElementById('studyForm').reset(); resetTimer();
+        updateProfile(); updateChallengeProgress(); drawChallengePie();
+    };
+    function updateStudyList() {
+        const ul = document.getElementById('studyList'); ul.innerHTML = '';
+        studySessions.forEach((s) => {
+            let li = document.createElement('li');
+            li.innerHTML = `<span style="color:#333;font-weight:600;background:${s.color};border-radius:6px;padding:4px 12px;margin-right:5px;">${s.subject}</span>
+                <span>${s.hours} hrs</span> <span style="color:#aaa;font-size:0.9em;">${new Date(s.date).toLocaleDateString()}</span>`;
+            ul.appendChild(li);
+        });
+    }
+    function updateProgress() {
+        let total = studySessions.reduce((a,b)=>a+b.hours,0);
+        let goal = 20, percent = Math.min(100, Math.round((total / goal)*100));
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressText').textContent = `Progress: ${percent}%`;
+    }
+    //--- Challenge/PieChart ---
+    function fillChallengeSubjects() {
+        let sel = document.getElementById('challengeSubject'); sel.innerHTML = "";
+        subjects.forEach(s => {
+            let opt = document.createElement('option'); opt.textContent = s.name; opt.value = s.name; sel.appendChild(opt);
+        });
+    }
+    document.getElementById('challengeForm').onsubmit = function(e) {
+        e.preventDefault();
+        let startDate = document.getElementById('challengeStart').value,
+            endDate = document.getElementById('challengeEnd').value,
+            type = document.getElementById('challengeType').value,
+            goal = Number(document.getElementById('challengeGoal').value),
+            ref = Number(document.getElementById('challengeRefHours').value);
+        let subjEls = Array.from(document.getElementById('challengeSubject').selectedOptions);
+        let subjectsSel = subjEls.map(o=>o.value);
+        if (!startDate || !endDate || !goal || !ref || subjectsSel.length===0) {
+            alert("Please fill all challenge fields and choose subject(s)!");
+            return;
+        }
+        challenge = {start:startDate, end:endDate, type, goal, reference:ref, subjects:subjectsSel};
+        user.challenge = challenge; saveUsers(users);
+        document.getElementById('challengeProgress').classList.remove('hidden');
+        updateChallengeProgress(); drawChallengePie();
+    };
+    function updateChallengeProgress() {
+        if(!challenge) return;
+        let now=new Date(), start=new Date(challenge.start), end=new Date(challenge.end);
+        let progressHours=studySessions.filter(s=>{
+            let d=new Date(s.date);
+            return d>=start&&d<=end&&challenge.subjects.includes(s.subject);
+        }).reduce((a,b)=>a+b.hours,0);
+        let percent=Math.min(100,Math.round((progressHours/challenge.goal)*100));
+        document.getElementById('challengeProgressBar').style.width=percent+'%';
+        let days=Math.ceil((end-start)/(1000*60*60*24))+1;
+        let left = Math.max(0,challenge.goal-progressHours);
+        document.getElementById('challengeProgressText').textContent=
+            `You have studied ${progressHours}/${challenge.goal} hrs in ${challenge.subjects.join(', ')}. ${left} hrs left in ${days} day(s).`;
+    }
+    function drawChallengePie() {
+        let pie=document.getElementById('challengePie'), ctx=pie.getContext('2d');
+        ctx.clearRect(0,0,pie.width,pie.height);
+        if(!challenge) { document.getElementById('challengePieLabel').textContent="No challenge set."; return; }
+        let start=new Date(challenge.start), end=new Date(challenge.end);
+        let progressHours=studySessions.filter(s=>{
+            let d=new Date(s.date);
+            return d>=start&&d<=end&&challenge.subjects.includes(s.subject);
+        }).reduce((a,b)=>a+b.hours,0);
+        let percent=Math.min(1,progressHours/challenge.goal), angle=percent*2*Math.PI;
+        // Draw background
+        ctx.beginPath(); ctx.arc(61,61,54,0,2*Math.PI,false); ctx.fillStyle="#eaeaea"; ctx.fill();
+        // Draw progress
+        ctx.beginPath(); ctx.moveTo(61,61);
+        ctx.arc(61,61,54,-Math.PI/2,-Math.PI/2+angle,false);
+        ctx.lineTo(61,61); ctx.fillStyle="#c7b1e9"; ctx.fill();
+        ctx.font="600 15px Poppins";
+        ctx.fillStyle="#b38bae"; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(`${Math.round(percent*100)}%`,61,67);
+        document.getElementById('challengePieLabel').textContent=
+            `Progress: ${progressHours}/${challenge.goal} hrs (${challenge.subjects.join(", ")})`;
+    }
+    function sendChallenge() {
+        let friend=document.getElementById('friendUser').value.trim();
+        if(!friend) return alert("Enter a friend's name.");
+        addNotification(`Challenge request to ${friend}`,"challenge_request");
+        document.getElementById('challengeSentMsg').classList.remove('hidden');
+        document.getElementById('challengeSentMsg').textContent=`Challenge request sent to ${friend}!`;
+    }
+    //--- Friend logic ---
+    function searchFriend() {
+        let name=document.getElementById('addFriendInput').value.trim(), resultDiv=document.getElementById('friendSearchResults');
+        resultDiv.innerHTML='';
+        let allOtherUsers=users.filter(u=>u.name!==user.name);
+        if(!name) return;
+        let found=allOtherUsers.filter(u=>u.name.toLowerCase().includes(name.toLowerCase()));
+        if(found.length===0){ resultDiv.innerHTML=`<div class="card">No user found with that name.</div>`;}
+        else{found.forEach(u=>{
+            let div=document.createElement('div');
+            div.className="card";
+            div.innerHTML=`${u.name} (Class: ${u.class}) <button onclick="addFriendRequest('${u.name}')">Add Friend</button>`;
+            resultDiv.appendChild(div);
+        });}
+    }
+    function addFriendRequest(fname) {
+        if(friends.indexOf(fname)!==-1) {
+            document.getElementById('friendMsg').classList.remove('hidden');
+            document.getElementById('friendMsg').textContent=`${fname} is already your friend.`; return;
+        }
+        addNotification(`Friend request from ${fname}`,"friend_request");
+        document.getElementById('friendMsg').classList.remove('hidden');
+        document.getElementById('friendMsg').textContent=`Friend request sent to ${fname}.`;
+    }
+    function updateFriends() {
+        let ul=document.getElementById('friendsList');
+        ul.innerHTML='';
+        friends.forEach(f=>{
+            let li=document.createElement('li'); li.textContent=f; ul.appendChild(li);
+        });
+    }
+    //--- Profile: Hours per subjects & periods
+    function hoursBySubject(period){
+        const periods = {day:1, week:7, month:30, year:366};
+        let now=new Date();
+        let cut=(periods[period]!==undefined)?periods[period]:1;
+        let sessions = studySessions.filter(s=>{let diff=(now-new Date(s.date))/(1000*60*60*24); return diff<cut;});
+        let subHours = {};
+        sessions.forEach(s=>{
+            subHours[s.subject]= (subHours[s.subject]||0)+s.hours;
+        });
+        return subHours;
+    }
+    function showMostSubject(period, elemId) {
+        let subHours=hoursBySubject(period), arr = Object.entries(subHours).sort((a,b)=>b[1]-a[1]);
+        let s = arr.length > 0 ? `${arr[0][0]} (${arr[0][1]} hrs)` : "No record";
+        document.getElementById(elemId).innerHTML = `<b>${period.charAt(0).toUpperCase()+period.slice(1)}:</b> ${s}`;
+    }
+    function updateProfile() {
+        document.getElementById('profileUserName').textContent=user.name;
+        document.getElementById('profileUserClass').textContent=`(Class: ${user.class})`;
+        let total=studySessions.reduce((a,b)=>a+b.hours,0), now=new Date();
+        let today=studySessions.filter(s=>new Date(s.date).toDateString()===now.toDateString()).reduce((a,b)=>a+b.hours,0);
+        let week=studySessions.filter(s=>{let diff=(now-new Date(s.date))/(1000*60*60*24);return diff<7;}).reduce((a,b)=>a+b.hours,0);
+        let month=studySessions.filter(s=>{let diff=(now-new Date(s.date))/(1000*60*60*24);return diff<30;}).reduce((a,b)=>a+b.hours,0);
+        let year=studySessions.filter(s=>{let diff=(now-new Date(s.date))/(1000*60*60*24);return diff<366;}).reduce((a,b)=>a+b.hours,0);
+        document.getElementById('totalHoursProfile').textContent=total;
+        document.getElementById('todayHoursProfile').textContent=today;
+        document.getElementById('weekHoursProfile').textContent=week;
+        document.getElementById('monthHoursProfile').textContent=month;
+        document.getElementById('yearHoursProfile').textContent=year;
+        showMostSubject('day','mostSubjectsDay');
+        showMostSubject('week','mostSubjectsWeek');
+        showMostSubject('month','mostSubjectsMonth');
+        showMostSubject('year','mostSubjectsYear');
+        updateFriends();
+    }
+    //--- Quotes logic
+    function showQuoteOnLoad() {
+        inspirationalQuote=getSavedQuote();
+        let block = document.getElementById('inspirationalQuoteBlock'), text = document.getElementById('quoteText');
+        if(inspirationalQuote){
+            text.textContent=inspirationalQuote;
+            block.classList.remove('hidden');
+        } else block.classList.add('hidden');
+    }
+    function addQuote() {
+        let q = document.getElementById('quoteInput').value.trim();
+        if(q.length===0) return;
+        inspirationalQuote = q; setSavedQuote(q); showQuoteOnLoad(); document.getElementById('quoteInput').value='';
+    }
+    function removeQuote(){ inspirationalQuote=null; setSavedQuote(null); showQuoteOnLoad(); }
+    function dismissQuote(){ document.getElementById('inspirationalQuoteBlock').classList.add('hidden'); }
+</script>
+</body>
+</html>
